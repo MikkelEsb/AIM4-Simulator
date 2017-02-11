@@ -1,4 +1,4 @@
-# AIM4-Simulator
+# AIM4 Simulator
 The open source code behind the Autonomous Intersection Management simulator from University of Texas.
 
 AIM4 is a traffic simulator for the study of innovative design of intersection control protocol.
@@ -51,3 +51,33 @@ Version 1.0.1
 
 Version 1.0.0
 - Initial release
+
+## Contributors
+
+### Project Members
+
+ - Prof. Peter Stone
+ - Dr. Guni Sharon
+ - Dr. Michael Albert
+ - Josiah Hannah
+ 
+### Collaborators
+
+ - Prof. Stephen Boyles
+ - Michael Levin
+ - Tarun Rambha
+
+### Past Members
+
+ - Kurt Dresner
+ - Mark van Middlesworth
+ - Michael Quinlan
+ - Neda Shahidi
+ - Hayknecht Matthew
+ - Shun Zhang
+ - Tsz-Chiu Au
+ 
+### Past Collaborators
+
+ - Prof. Travis Waller
+ - David Fajardo
