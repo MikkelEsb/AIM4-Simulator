@@ -7,7 +7,7 @@ AIM4 is currently maintained by Tsz-Chiu Au <chiu@cs.utexas.edu>.
 
 ## Running the Simulation
 
-**For more information, view the documentation located in the `docs/` directory.**
+**For more information on the simulation, view the documentation located in the `docs/` directory.**
 
 Install Apache Maven (version >= 2.2.1):
 
@@ -30,6 +30,7 @@ To execute a particular main function, type
 To check the coding style, type
 
 `mvn checkstyle:checkstyle`
+
 `view target/checkstyle-result.xml`
 
 To clean up, type
