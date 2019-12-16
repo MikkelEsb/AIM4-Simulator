@@ -127,8 +127,8 @@ public class ApproxNPhasesTrafficSignalSimSetup extends BasicSimSetup
         layout, currentTime, gridConfig, trafficSignalPhaseFileName);
 
     if (numOfColumns == 1 && numOfRows == 1) {
-      GridMapUtil.setUniformRatioSpawnPoints(layout, trafficVolumeFileName);
-      // GridLayoutUtil.setUniformTurnBasedSpawnPoints(layout, trafficLevel);
+      //GridMapUtil.setUniformRatioSpawnPoints(layout, trafficVolumeFileName);
+      GridMapUtil.setUniformTurnBasedSpawnPoints(layout, trafficLevel);
     } else {
       GridMapUtil.setUniformRandomSpawnPoints(layout, trafficLevel);
     }

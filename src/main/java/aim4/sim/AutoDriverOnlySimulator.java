@@ -123,6 +123,17 @@ public class AutoDriverOnlySimulator implements Simulator {
   /** The total number of bits received by the completed vehicles */
   private int totalBitsReceivedByCompletedVehicles;
 
+  /**All vehicles that have entered the intersection */
+  private int numProccessed[];
+  private double TotalIntersectionSpeed[];
+  private int numObservations[];
+  private double TotalSystemSpeed;
+  private int numSystemObservations;
+  private LinkedList<Integer> enteredVehicles[];
+  private boolean canUpdate;
+  private int numCompletedLastInterval;
+
+
 
   /////////////////////////////////
   // CLASS CONSTRUCTORS
@@ -141,6 +152,10 @@ public class AutoDriverOnlySimulator implements Simulator {
     numOfCompletedVehicles = 0;
     totalBitsTransmittedByCompletedVehicles = 0;
     totalBitsReceivedByCompletedVehicles = 0;
+
+    resetIntersectionData();
+
+
   }
 
   /////////////////////////////////
@@ -186,8 +201,34 @@ public class AutoDriverOnlySimulator implements Simulator {
     currentTime += timeStep;
     // debug
     checkClocks();
-
+    calculateIntersectionStatistics();
+    int brexit = (int) currentTime % 60;
+    if (brexit==0 && canUpdate){
+      canUpdate=false;
+      //Do things
+      //System.out.println("Time: [" + Math.floor(currentTime) + "] Completed Vehicles: [" + getNumOfProccessedVehicles(0) +"] AvgSpeed: [" + getAverageVehicleSpeedForIntersection(0) + "]");
+      System.out.println(""+ Math.floor(currentTime) + ";" + numOfCompletedVehiclesInterval() +";" + getAverageVehicleVelocity());
+      resetIntersectionData();
+    }
+    if (brexit>0){
+      canUpdate=true;
+    }
     return new AutoDriverOnlySimStepResult(completedVINs);
+  }
+
+  public void resetIntersectionData(){
+    numProccessed = new int[basicMap.getIntersectionManagers().size()];
+    numObservations = new int[basicMap.getIntersectionManagers().size()];
+    numSystemObservations = 0;
+    enteredVehicles= new LinkedList[basicMap.getIntersectionManagers().size()];
+    numCompletedLastInterval=numOfCompletedVehicles;
+    TotalIntersectionSpeed=new double[basicMap.getIntersectionManagers().size()];
+    TotalSystemSpeed = 0;
+    for(int i=0;i<enteredVehicles.length;i++){
+      enteredVehicles[i]=new LinkedList<Integer>();
+
+    }
+
   }
 
   /////////////////////////////////
@@ -218,6 +259,73 @@ public class AutoDriverOnlySimulator implements Simulator {
   @Override
   public synchronized int getNumCompletedVehicles() {
     return numOfCompletedVehicles;
+  }
+  public synchronized int numOfCompletedVehiclesInterval(){
+    return numOfCompletedVehicles-numCompletedLastInterval;
+  }
+
+
+  public synchronized double getAverageVehicleVelocity(){
+    return TotalSystemSpeed/numSystemObservations;
+  }
+  public synchronized int getNumSystemObservations(){
+    return numSystemObservations;
+  }
+  public synchronized int getNumOfProccessedVehicles(int id){
+    return numProccessed[id];
+  }
+  public synchronized double getAverageVehicleSpeedForIntersection(int id){
+    return TotalIntersectionSpeed[id]/numObservations[id];
+  }
+
+
+  public synchronized void calculateIntersectionStatistics(){
+    double totsys=0;
+    for(VehicleSimView vehicle : vinToVehicles.values()) {
+      totsys+=Math.abs(vehicle.getVelocity());
+      numSystemObservations++;
+
+    }
+    TotalSystemSpeed+=totsys;
+
+
+    for(IntersectionManager im : basicMap.getIntersectionManagers()) {
+      double totalSpeed=0;
+      int numVehicles=0;
+      //Only check vehicles if we have an intersection manager to check it against.
+      int imID= im.getId();
+      for (VehicleSimView vehicle : vinToVehicles.values()) {
+        int VIN=vehicle.getVIN();
+        if (im.containsACorner(vehicle)) {
+          boolean hasVehicle=false;
+
+          for (int i=0; i<enteredVehicles[imID].size();i++) {
+            if (enteredVehicles[imID].get(i)==VIN){
+              hasVehicle=true;
+              break;
+            }
+          }
+          if (!hasVehicle) {
+            enteredVehicles[imID].add(VIN);
+
+          }
+          totalSpeed += Math.abs(vehicle.getVelocity());
+          numVehicles+=1;
+        }else{
+          for (int i=0; i<enteredVehicles[imID].size();i++){
+            if (enteredVehicles[imID].get(i)==VIN){
+
+              numProccessed[imID]+=1;
+              enteredVehicles[imID].remove(i);
+              break;
+            }
+          }
+        }
+
+      }
+      TotalIntersectionSpeed[imID]+=totalSpeed;
+      numObservations[imID]+=numVehicles;
+    }
   }
 
   /**
@@ -902,6 +1010,7 @@ public class AutoDriverOnlySimulator implements Simulator {
     for(VehicleSimView vehicle : vinToVehicles.values()) {
       Point2D p1 = vehicle.getPosition();
       vehicle.move(timeStep);
+
       Point2D p2 = vehicle.getPosition();
       for(DataCollectionLine line : basicMap.getDataCollectionLines()) {
         line.intersect(vehicle, currentTime, p1, p2);

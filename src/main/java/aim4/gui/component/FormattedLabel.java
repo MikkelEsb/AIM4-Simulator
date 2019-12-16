@@ -51,7 +51,7 @@ public class FormattedLabel extends JLabel {
    * numeric values will display in an easily readable format if their values
    * change rapidly.
    */
-  public static final Font FONT = new Font("Monospaced", Font.PLAIN, 10);
+  public static final Font FONT = new Font("Monospaced", Font.PLAIN, 16 );
 
   // ///////////////////////////////
   // PRIVATE FIELDS

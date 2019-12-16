@@ -75,6 +75,13 @@ public interface Simulator {
    */
   int getNumCompletedVehicles();
 
+  void resetIntersectionData();
+
+  int getNumOfProccessedVehicles(int id);
+
+  double getAverageVehicleVelocity();
+
+  double getAverageVehicleSpeedForIntersection(int value);
   /**
    * Get average number of bits transmitted by completed vehicles.
    *

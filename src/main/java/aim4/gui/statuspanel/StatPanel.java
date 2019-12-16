@@ -32,6 +32,7 @@ package aim4.gui.statuspanel;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.io.PrintWriter;
 
 import javax.swing.JPanel;
 
@@ -52,7 +53,7 @@ public class StatPanel extends JPanel
   // ///////////////////////////////
   // PRIVATE FIELDS
   // ///////////////////////////////
-
+  private double PeakFlow=0;
   /** The current time in the simulator. */
   private FormattedLabel currentTimeLabel =
     new FormattedLabel("Current Time: ", "%8.2f s", 10);
@@ -60,11 +61,29 @@ public class StatPanel extends JPanel
   private FormattedLabel overallCompletedVehiclesLabel =
     new FormattedLabel("Completed Vehicles: ", "%5d", 5);
   /** The average amount of data transmitted. */
+
+  private FormattedLabel overallAverageVehicleSpeedLabel =
+          new FormattedLabel("Average vehicle speed: ", "%5.2f km/h", 5);
+
+  private FormattedLabel overallAverageVehicleSpeedIM1Label =
+          new FormattedLabel("Average vehicle speed IM1: ", "%5.2f km/h", 5);
+
+  private FormattedLabel overallAverageFlowLabel =
+          new FormattedLabel("Average flow: ", "%5.2f car/h", 5);
+
+  private FormattedLabel overallPeakFlowLabel =
+          new FormattedLabel("Peak flow: ", "%5.2f car/h", 5);
+
+  private FormattedLabel overallAverageDensityLabel =
+          new FormattedLabel("Average Density: ", "%5.2f car/km", 5);
+
+  /** The average amount of data transmitted. */
   private FormattedLabel overallAverageTransmittedLabel =
     new FormattedLabel("Average Data Transmitted: ", "%5.2f kB", 8);
   /** The average amount of data received. */
   private FormattedLabel overallAverageReceivedLabel =
     new FormattedLabel("Average Data Received: ", "%5.2f kB", 8);
+
 
   /** The viewer object */
   private Viewer viewer;
@@ -97,6 +116,33 @@ public class StatPanel extends JPanel
     c.gridwidth = GridBagConstraints.REMAINDER;
     gridbag.setConstraints(overallCompletedVehiclesLabel, c);
     add(overallCompletedVehiclesLabel);
+
+    //Average Speed
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    gridbag.setConstraints(overallAverageVehicleSpeedLabel, c);
+    add(overallAverageVehicleSpeedLabel);
+
+
+    //Average vehicle speed IM1
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    gridbag.setConstraints(overallAverageVehicleSpeedIM1Label, c);
+    add(overallAverageVehicleSpeedIM1Label);
+
+    //Average flow
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    gridbag.setConstraints(overallAverageFlowLabel, c);
+    add(overallAverageFlowLabel);
+
+    //Peak flow
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    gridbag.setConstraints(overallPeakFlowLabel, c);
+    add(overallPeakFlowLabel);
+
+    //Average Density
+    c.gridwidth = GridBagConstraints.REMAINDER;
+    gridbag.setConstraints(overallAverageDensityLabel, c);
+    add(overallAverageDensityLabel);
+
     // Information Transmitted
     c.gridwidth = 1; // restore default
     gridbag.setConstraints(overallAverageTransmittedLabel, c);
@@ -119,9 +165,33 @@ public class StatPanel extends JPanel
     Simulator sim = viewer.getSimulator();
     if (sim != null) {
       // Current Time
-      currentTimeLabel.update(sim.getSimulationTime());
+      double simTime=sim.getSimulationTime();
+      currentTimeLabel.update(simTime);
       // Completed Vehicles
-      overallCompletedVehiclesLabel.update(sim.getNumCompletedVehicles());
+      int compVehicle = sim.getNumCompletedVehicles();
+      overallCompletedVehiclesLabel.update(compVehicle);
+      double avgSpeed = sim.getAverageVehicleVelocity();
+      overallAverageVehicleSpeedLabel.update(avgSpeed*3.6);
+
+      double avgIM1Speed=sim.getAverageVehicleSpeedForIntersection(0);
+      overallAverageVehicleSpeedIM1Label.update(avgIM1Speed*3.6);
+      //System.out.println(sim.getNumOfProccessedVehicles());
+      double flow = compVehicle/simTime*3600;
+      double intersectionFlow = sim.getNumOfProccessedVehicles(0)/simTime*3600;
+      //System.out.println(intersectionFlow);
+
+
+
+
+      overallAverageFlowLabel.update(intersectionFlow);
+
+      if (flow>PeakFlow){
+        PeakFlow=flow;
+      }
+      overallPeakFlowLabel.update(PeakFlow);
+
+      overallAverageDensityLabel.update((flow/(avgSpeed*3.6)));
+
       // Average Data Transmitted
       overallAverageTransmittedLabel.update(sim
         .getAvgBitsTransmittedByCompletedVehicles()
@@ -130,6 +200,9 @@ public class StatPanel extends JPanel
       overallAverageReceivedLabel.update(sim
         .getAvgBitsReceivedByCompletedVehicles()
         / Constants.BITS_PER_KB);
+
+
+
     } else {
       clear();
     }
@@ -140,6 +213,7 @@ public class StatPanel extends JPanel
    */
   @Override
   public void clear() {
+    PeakFlow=0;
     currentTimeLabel.clear();
     overallCompletedVehiclesLabel.clear();
     overallAverageTransmittedLabel.clear();

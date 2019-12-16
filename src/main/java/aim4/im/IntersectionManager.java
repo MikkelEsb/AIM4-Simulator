@@ -198,6 +198,16 @@ public class IntersectionManager {
     return true;
   }
 
+
+  public boolean containsACorner(VehicleSimView vehicle){
+    for( Point2D corner : vehicle.getCornerPoints()){
+      if (intersection.getArea().contains(corner)){
+        return true;
+      }
+    }
+    return false;
+  }
+
   /**
    * Determine whether the given Rectangle intersects the Area governed
    * by this IntersectionManager.
